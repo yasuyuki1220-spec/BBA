@@ -2038,7 +2038,7 @@ window.addEventListener('keydown',function(e){
   }
 });
 window.addEventListener('keyup',function(e){ keys[e.code]=false; });
-window.addEventListener('blur',function(){ keys={}; if(G.mode==='play'&&!NET.on) togglePause(); });
+window.addEventListener('blur',function(){ keys={}; touchAtk=false; });
 window.addEventListener('contextmenu',function(e){ e.preventDefault(); });
 var stick=$('stick'), knob=$('knob'), stickId=null;
 function stickMove(e){
