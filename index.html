@@ -139,6 +139,11 @@ body{
 #crawl .staff{font-family:var(--mono);font-size:13px;color:var(--dim);line-height:2;letter-spacing:.1em}
 #crawl .staff b{color:var(--warn);font-weight:normal}
 @keyframes crawl{from{transform:translate(-50%,0)}to{transform:translate(-50%,calc(-100% - 100vh))}}
+#adbox{z-index:8;background:#060504}
+#adbox .adslot{width:min(336px,88vw);min-height:280px;border:1px dashed var(--dim);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#15110d;padding:16px;box-sizing:border-box}
+#adbox .adslot b{font-family:var(--display);font-weight:normal;font-size:26px;color:#f4ead0;text-shadow:2px 2px 0 var(--akaji)}
+#adbox .adslot span{font-size:13px;color:var(--dim);line-height:1.7}
+#adSkip[disabled]{opacity:.5;cursor:default}
 #endingBtns .go.sub{background:rgba(12,9,8,.92)}
 #endingBtns{position:absolute;z-index:1;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);left:0;right:0;display:flex;justify-content:center;gap:10px}
 </style>
@@ -207,6 +212,12 @@ body{
   <div class="unlock" id="unlockMsg" hidden></div>
   <div class="rank" id="rankE"></div>
   <div class="endbtns"><button class="go" id="retry">RETRY</button><button class="go sub" id="retry2" hidden></button><button class="go sub" id="endTitleBtn">タイトルへ</button></div>
+</div>
+
+<div id="adbox" class="screen" hidden>
+  <div class="tk">ADVERTISEMENT ・ 広告</div>
+  <div class="adslot" id="adSlot"><b>ババアソリッド</b><span>広告枠（テスト表示）<br>公開版ではここに広告が入ります</span></div>
+  <button class="go sub" id="adSkip" disabled>3</button>
 </div>
 
 <div id="ending" class="screen" hidden>
@@ -1588,15 +1599,59 @@ $('storyBtn').addEventListener('click',function(){
   startStory(st.done?1:st.ch);
 });
 $('chapters').addEventListener('click',function(e){ var b=e.target.closest('button'); if(b) startStory(+b.dataset.ch); });
-$('toTitle').addEventListener('click',toTitle); $('endTitleBtn').addEventListener('click',toTitle); $('skipEnding').addEventListener('click',toTitle);
-$('retry').addEventListener('click',function(){ $('end').hidden=true; $('unlockMsg').hidden=true; if(G.endAct) G.endAct(); });
-$('retry2').addEventListener('click',function(){ $('end').hidden=true; $('unlockMsg').hidden=true; if(G.endAct2) G.endAct2(); });
+/* ---------- Ads: ステージクリア毎・ゲームオーバー毎のインタースティシャル ----------
+   provider: 'house' = テスト用の自前広告枠 / 'adsense' = AdSense H5ゲーム広告 (adBreak) / 'crazygames' = CrazyGames SDK v3 / 'none' = 広告なし
+   公開版では AD_CONFIG を書き換える。adsenseClient には 'ca-pub-...' を入れる。 */
+var AD_CONFIG={provider:'house', adsenseClient:'', adsenseTest:true};
+var ADS={ready:false,busy:false,cg:null};
+function initAds(){
+  var c=AD_CONFIG;
+  try{
+    if(c.provider==='adsense'&&c.adsenseClient){
+      var sc=document.createElement('script'); sc.async=true; sc.crossOrigin='anonymous';
+      sc.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(c.adsenseClient);
+      sc.setAttribute('data-ad-client',c.adsenseClient); if(c.adsenseTest) sc.setAttribute('data-adbreak-test','on');
+      document.head.appendChild(sc);
+      window.adsbygoogle=window.adsbygoogle||[]; window.adBreak=window.adConfig=function(o){ window.adsbygoogle.push(o); };
+      window.adConfig({preloadAdBreaks:'on',sound:'on'}); ADS.ready=true;
+    } else if(c.provider==='crazygames'){
+      var s2=document.createElement('script'); s2.src='https://sdk.crazygames.com/crazygames-sdk-v3.js';
+      s2.onload=function(){ try{ window.CrazyGames.SDK.init().then(function(){ ADS.cg=window.CrazyGames.SDK; ADS.ready=true; }); }catch(e){} };
+      document.head.appendChild(s2);
+    } else if(c.provider==='house') ADS.ready=true;
+  }catch(e){}
+}
+function adAudio(off){ if(master) master.gain.value=(off||muted)?0:1; }
+function showAd(name,done){
+  var fin=false; function finish(){ if(fin) return; fin=true; ADS.busy=false; adAudio(false); done(); }
+  if(ADS.busy||!ADS.ready||AD_CONFIG.provider==='none'){ done(); return; }
+  ADS.busy=true;
+  var p=AD_CONFIG.provider;
+  try{
+    if(p==='adsense'){
+      window.adBreak({type:'next',name:name,beforeAd:function(){ adAudio(true); },afterAd:function(){ adAudio(false); },adBreakDone:finish});
+      setTimeout(finish,30000); return;
+    }
+    if(p==='crazygames'&&ADS.cg){
+      ADS.cg.ad.requestAd('midgame',{adStarted:function(){ adAudio(true); },adFinished:finish,adError:finish});
+      return;
+    }
+  }catch(e){ finish(); return; }
+  // house (テスト表示)
+  var box=$('adbox'), sk=$('adSkip'), n=3; box.hidden=false; sk.disabled=true; sk.textContent=n+'秒後に閉じられます';
+  var iv=setInterval(function(){ n--; if(n>0){ sk.textContent=n+'秒後に閉じられます'; return; } clearInterval(iv); sk.disabled=false; sk.textContent='閉じる ✕'; },1000);
+  sk.onclick=function(){ if(sk.disabled) return; sk.onclick=null; box.hidden=true; finish(); };
+}
+function afterAd(fn){ return function(){ var k=G.adPending; G.adPending=null; if(k) showAd(k,fn); else fn(); }; }
+$('toTitle').addEventListener('click',toTitle); $('endTitleBtn').addEventListener('click',afterAd(toTitle)); $('skipEnding').addEventListener('click',toTitle);
+$('retry').addEventListener('click',afterAd(function(){ $('end').hidden=true; $('unlockMsg').hidden=true; if(G.endAct) G.endAct(); }));
+$('retry2').addEventListener('click',afterAd(function(){ $('end').hidden=true; $('unlockMsg').hidden=true; if(G.endAct2) G.endAct2(); }));
 function endButtons(a,fa,b,fb){
   $('retry').textContent=a; G.endAct=fa;
   var r2=$('retry2'); r2.hidden=!b; if(b){ r2.textContent=b; G.endAct2=fb; }
 }
 function storyClear(){
-  G.mode='end'; sfx.win(); $('end').hidden=false; $('rankE').innerHTML='';
+  G.adPending='stage_clear'; G.mode='end'; sfx.win(); $('end').hidden=false; $('rankE').innerHTML='';
   var SC=STORY[R.stage-1], st=loadStory(), last=R.stage>=R.total;
   st.unlocked=true; if(last) st.done=true; else st.ch=Math.max(st.ch,R.stage+1); saveStory(st);
   var t=$('endTitle'); t.className='good'; t.textContent='第'+R.stage+'章 クリア';
@@ -1610,7 +1665,7 @@ function storyClear(){
 }
 function missionFail(msg){
   if(G.mode!=='play') return;
-  G.mode='end'; sfx.caught(); $('end').hidden=false; $('rankE').innerHTML='';
+  G.adPending='game_over'; G.mode='end'; sfx.caught(); $('end').hidden=false; $('rankE').innerHTML='';
   var t=$('endTitle'); t.className='bad'; t.textContent='作戦失敗';
   $('endText').innerHTML=msg;
   if(R.mode==='story') endButtons('この章をやり直す',function(){ startStory(R.stage); },null,null);
@@ -1634,7 +1689,7 @@ function fmt(s){ var m=Math.floor(s/60),x=Math.floor(s%60); return (m<10?'0':'')
 var PAR=[150,170,170,190,210];
 function animal(sc){ return sc>=12000?'S フクロウ':(sc>=9000?'A ネコ':(sc>=6000?'B タヌキ':'C ニワトリ')); }
 function stageClear(){
-  G.mode='end'; sfx.win(); $('end').hidden=false;
+  G.adPending='stage_clear'; G.mode='end'; sfx.win(); $('end').hidden=false;
   var tb=Math.max(0,Math.round((PAR[R.stage-1]-G.time)*8)), st=G.alerts===0?800:0, ko=G.stageKos*150, lf=Math.round(P.life*4), base=1000+R.stage*200;
   var sub=base+tb+st+ko+lf; R.score+=sub; R.alerts+=G.alerts; R.cleared++;
   var t=$('endTitle'); t.className='good';
@@ -1655,7 +1710,7 @@ function stageClear(){
   }
 }
 function gameOver(){
-  G.mode='end'; sfx.caught(); $('end').hidden=false;
+  G.adPending='game_over'; G.mode='end'; sfx.caught(); $('end').hidden=false;
   var t=$('endTitle'); t.className='bad'; t.textContent='お説教タイム…';
   $('endText').innerHTML='第'+R.stage+'面で力尽きた…<br>合計 '+R.score.toLocaleString()+'点 ('+R.cleared+'面クリア)';
   if(R.mode==='story'){
@@ -1938,7 +1993,7 @@ function loop(now){
   if((gf++%3)===0) grain();
   renderer.render(scene,camera);
 }
-newRun(); refreshTitle();
+newRun(); refreshTitle(); initAds();
 requestAnimationFrame(loop);
 
 })();
