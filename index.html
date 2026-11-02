@@ -68,7 +68,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);overf
 .tag i u{display:block;height:100%;background:var(--ok)}
 .tag.me b::after{content:" ▼"}
 #bubbles{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden}
-.bub{position:absolute;transform:translate(-50%,-100%);background:#fffbe8;color:#141210;border:2px solid #141210;border-radius:12px;padding:2px 8px;font-family:var(--hand);font-size:13px;white-space:nowrap;margin-top:-14px}
+.bub{position:absolute;transform:translate(-50%,-100%);background:#fffbe8;color:#141210;border:2px solid #141210;border-radius:12px;padding:1px 7px;font-family:var(--hand);font-size:12px;white-space:nowrap;margin-top:-14px;opacity:.92}
 .bub::after{content:"";position:absolute;left:50%;bottom:-8px;margin-left:-5px;border:5px solid transparent;border-top:7px solid #141210}
 .bub.g{background:#ffeceb}
 [hidden]{display:none !important}
@@ -79,8 +79,22 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);overf
 #card b{font-family:var(--display);font-weight:normal;font-size:clamp(40px,13vw,72px);color:#fff4d0;text-shadow:3px 3px 0 var(--akaji),6px 6px 0 #000}
 #toast{position:fixed;left:50%;top:44%;transform:translateX(-50%);z-index:3;background:rgba(10,8,6,.9);border:1px solid var(--dim);padding:5px 14px;font-size:14px;white-space:nowrap;opacity:0;transition:opacity .25s;pointer-events:none;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
 #toast.show{opacity:1}
-#feed{position:fixed;right:max(16px,env(safe-area-inset-right,0px));top:46%;display:flex;flex-direction:column;align-items:flex-end;gap:3px;z-index:2;pointer-events:none}
-#feed div{background:rgba(10,8,6,.82);font-size:12px;padding:2px 8px;border-right:3px solid var(--alert);animation:fdIn .25s ease}
+@media (max-width:560px){
+  #cards{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}
+  .fc{padding:2px 4px 3px;font-size:11px;line-height:1.15}
+  .fc .hp{height:4px;margin:1px 0}
+  .fc .st{font-size:9px;letter-spacing:0}
+  .fc .st em{display:none}
+  #radar{width:84px;height:63px}
+  #clock{font-size:15px;padding:1px 8px}
+  .mini{padding:3px 7px;font-size:11px}
+  #held{font-size:11px;padding:2px 6px}
+  .row2{margin-top:-2px}
+  .lft{gap:3px}
+}
+.rcol{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+#feed{display:flex;flex-direction:column;align-items:flex-end;gap:2px;pointer-events:none;max-width:52vw}
+#feed div{background:rgba(10,8,6,.72);font-size:11px;padding:1px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;box-sizing:border-box;border-right:3px solid var(--alert);animation:fdIn .25s ease}
 @keyframes fdIn{from{opacity:0;transform:translateX(20px)}}
 .screen{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;overflow-y:auto;
   background:radial-gradient(ellipse at 50% 40%,rgba(60,24,18,.86) 0%,rgba(12,9,8,.95) 75%);
@@ -166,7 +180,7 @@ input.tx:focus-visible{outline:2px solid var(--warn)}
         <div class="minis"><button class="mini" id="btnPause">一時停止</button><button class="mini" id="btnMute">音:全部</button></div>
         <div id="held">手ぶら</div>
       </div>
-      <canvas id="radar" width="118" height="88"></canvas>
+      <div class="rcol"><canvas id="radar" width="118" height="88"></canvas><div id="feed"></div></div>
     </div>
   </div>
   <div class="bottom">
@@ -182,7 +196,6 @@ input.tx:focus-visible{outline:2px solid var(--warn)}
 <div id="bubbles"></div>
 <div id="flash"></div>
 <div id="toast"></div>
-<div id="feed"></div>
 <div id="card"><small id="cardS"></small><b id="cardT"></b></div>
 <div id="spect" hidden><span>観戦中…</span><button class="mini" id="btnSkip">結果へ</button></div>
 <div id="pause" class="screen" hidden><h1 id="pauseH">一時停止</h1><p id="pauseNote" hidden>オンライン対戦中はゲームは止まりません</p><button class="go" id="resume">再開</button><button class="go sub" id="quit">タイトルへ戻る</button></div>
@@ -216,6 +229,7 @@ input.tx:focus-visible{outline:2px solid var(--warn)}
     <div class="opt"><div>CPUの強さ</div><div class="chips" id="optLvl"></div></div>
     <div class="opt"><div>ストック</div><div class="chips" id="optStock"></div></div>
   </div>
+  <div class="opt"><div>セリフ・実況</div><div class="chips" id="optTalk"></div></div>
   <div class="opt"><div>サウンド</div><div class="chips" id="optSnd"></div></div>
   <div id="padInfo"></div>
   <div class="endbtns"><button class="go big" id="fight">乱闘開始！</button><button class="go sub" id="setupBack">もどる</button></div>
@@ -678,7 +692,7 @@ var toastEl=$('toast'), toastT=0;
 function toast(t){ toastEl.textContent=t; toastEl.classList.add('show'); toastT=1.8; }
 var bubEl=$('bubbles'), bubs=[], _v=new THREE.Vector3();
 function say(ent,text,ttl,cls){
-  if(bubs.length>6) return;
+  if(bubs.length>(SET.talk<2?1:6)) return;
   var el=document.createElement('div'); el.className='bub '+(cls||''); el.textContent=text; bubEl.appendChild(el);
   bubs.push({el:el,ent:ent,t:ttl||1.8});
 }
@@ -1382,7 +1396,7 @@ function spdOf(f){ return f.zombieT>0?Math.min(f.C.spd,CH.zombie.spd+.1):f.C.spd
 function ang(dx,dz){ return Math.atan2(dx,dz); }
 function dist(a,b){ return Math.hypot(a.x-b.x,a.z-b.z); }
 function talk(f,txt,ttl){
-  if(G.mode==='demo'||f.sayT>0) return; f.sayT=1.6; say(f,txt,ttl||1.3,f.human?'':'g');
+  if(G.mode==='demo'||f.sayT>0) return; f.sayT=1.6; if(wantBub(f)) say(f,txt,ttl||1.3,f.human?'':'g');
   if(NET.rec) NET.EV.push(['b',f.slot,txt,ttl||1.3]);
 }
 
@@ -1446,15 +1460,20 @@ function tryGrab(f){
 function refreshSource(s){ s.models.forEach(function(m,i){ m.visible=i<s.stock; }); s.label.material.opacity=s.stock>0?.85:.25; }
 
 /* ---------- Effects ---------- */
+/* セリフ・実況の量: SET.talk 0=なし 1=少なめ(自分のセリフだけ) 2=多め(全員) */
+var MINOR=/^(バシッ|ドカッ|ボコッ|ハックション|壁ドン|ピーー|どっこいしょ|キラキラ|ビヨ|ハズレ|\+\d)/;
+function wantBub(f){ var t=SET.talk; return t===2||(t===1&&f.local); }
 function popText(txt,col,x,z,big){
-  if(TXT.length>24) return;
+  if(SET.talk<2&&MINOR.test(txt)) return;
+  if(TXT.length>(SET.talk<2?6:24)) return;
   var s=labelSprite(txt,col,big?3.4:2.2); s.position.set(x,2.6,z); scene.add(s); TXT.push({s:s,t:0});
 }
 function feed(txt){
   if(G.mode==='demo') return;
   var el=document.createElement('div'); el.textContent=txt; $('feed').appendChild(el);
-  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); },4200);
-  var fe=$('feed'); while(fe.children.length>5) fe.removeChild(fe.firstChild);
+  if(SET.talk===0&&!/KO|脱落|抜けた|入った/.test(txt)) return;
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); },SET.talk<2?3000:4200);
+  var fe=$('feed'), mx=SET.talk<2?3:5; while(fe.children.length>mx) fe.removeChild(fe.firstChild);
 }
 function jolt(f,fl,sh,st){
   if(!f) return;
@@ -2003,7 +2022,7 @@ sfx.caught=function(){ [[392,370,0],[370,349,.38],[349,330,.76],[330,247,1.14]].
 
 /* ---------- Settings / records ---------- */
 var SETK='town-smash-set-v1', RECK='town-smash-rec-v1';
-var SET={stage:'super',n:8,lvl:1,stock:3,ch:'baba',name:'',snd:0};
+var SET={stage:'super',n:8,lvl:1,stock:3,ch:'baba',name:'',snd:0,talk:1};
 try{ var _s=JSON.parse(localStorage.getItem(SETK)||'null'); if(_s) for(var _k in SET) if(_s[_k]!==undefined) SET[_k]=_s[_k]; }catch(e){}
 if(!CH[SET.ch]) SET.ch='baba';
 muted=SET.snd===2;
@@ -2258,7 +2277,7 @@ function applyEv(e){
   case 's': if(sfx[e[1]]) sfx[e[1]](); break;
   case 'p': popText(e[1],e[2],e[3],e[4],e[5]); break;
   case 'f': feed(e[1]); break;
-  case 'b': var f=F[e[1]]; if(f) say(f,e[2],e[3],f.human?'':'g'); break;
+  case 'b': var f=F[e[1]]; if(f&&wantBub(f)) say(f,e[2],e[3],f.human?'':'g'); break;
   case 'u': puff(e[1],e[2],e[3],e[4],e[5],e[6],e[7],e[8]); break;
   case 'r': addRing(e[1],e[2],e[3],e[4]); break;
   case 'c': showCard(e[1],e[2]); break;
@@ -2402,6 +2421,7 @@ function renderSetup(){
   chips($('optLvl'),[{v:0,t:'よわい'},{v:1,t:'ふつう'},{v:2,t:'つよい'}],SET.lvl,function(v){ SET.lvl=+v; });
   chips($('optStock'),[1,3,5].map(function(v){ return {v:v,t:v+'機'}; }),SET.stock,function(v){ SET.stock=+v; });
   chips($('optSnd'),[{v:0,t:'BGMと効果音'},{v:1,t:'効果音だけ'},{v:2,t:'なし'}],SET.snd,function(v){ setSnd(+v); initAudio(); });
+  chips($('optTalk'),[{v:1,t:'少なめ',s:'自分のセリフだけ'},{v:2,t:'多め',s:'全員しゃべる'},{v:0,t:'なし',s:'KOのお知らせだけ'}],SET.talk,function(v){ SET.talk=+v; });
   chips($('optChar'),CH_KEYS.map(function(k){ return {v:k,t:CH[k].n}; }),SET.ch,function(v){ SET.ch=v; });
   var C=CH[SET.ch];
   $('charDesc').innerHTML='<b>'+C.n+'</b> 体力 '+C.hp+' ・ 速さ '+stars(C.spd)+(C.items?'':' ・ アイテム不可')+'<br>'+C.desc;
