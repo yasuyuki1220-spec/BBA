@@ -7,6 +7,6 @@ tmp=$(mktemp -d)
 curl -sSL https://registry.npmjs.org/three/-/three-0.128.0.tgz | tar xz -C "$tmp"
 cp "$tmp/package/build/three.min.js" dist/game/three.min.js
 sed 's#https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js#three.min.js#' index.html > dist/game/index.html
-(cd dist/game && zip -qr ../shinobiashi-babaa.zip .)
+(cd dist/game && zip -qr ../dairanto-babaa.zip .)
 rm -rf "$tmp"
-echo "built dist/shinobiashi-babaa.zip"
+echo "built dist/dairanto-babaa.zip"
