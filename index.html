@@ -1,12 +1,12 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ババアソリッド</title>
+<title>忍び足ババア</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Share+Tech+Mono&family=Potta+One&family=Yusei+Magic&display=swap">
 <style>
-/* Layout concept: full-bleed night stage of a 1968 neighbourhood hall, HUD pinned to the edges like a soliton radar console. */
+/* Layout concept: full-bleed night stage of a 1968 neighbourhood hall, HUD pinned to the edges like a hand-drawn neighbourhood map. */
 :root{
   --bg:#0c0b0a; --panel:#17130f; --line:#3a3228; --fg:#e6dcc4; --dim:#a39679;
-  --warn:#ffb020; --alert:#ff4d3d; --ok:#8fd9a8; --crt:#58d68d; --akaji:#c8372d;
+  --warn:#ffb020; --alert:#ff4d3d; --ok:#8fd9a8; --crt:#c9a45a; --akaji:#c8372d;
   --font:'DotGothic16','Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;
   --display:'Potta One','DotGothic16','Hiragino Maru Gothic ProN',sans-serif;
   --hand:'Yusei Magic','DotGothic16','Hiragino Maru Gothic ProN',sans-serif;
@@ -51,7 +51,7 @@ body{
 #inv button.sel{color:var(--bg);background:var(--fg);border-color:var(--fg)}
 #inv button.out{opacity:.4}
 #inv button:focus-visible{outline:2px solid var(--warn);outline-offset:1px}
-#radar{width:128px;height:96px;border:1px solid var(--crt);background:#03130a;image-rendering:pixelated;flex:none;box-shadow:0 0 10px rgba(88,214,141,.25)}
+#radar{width:128px;height:96px;border:2px solid #6a4a30;background:#e8dcc0;image-rendering:pixelated;flex:none;box-shadow:2px 3px 0 rgba(0,0,0,.45);transform:rotate(-1.5deg)}
 .bottom{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
 #stick{pointer-events:auto;width:116px;height:116px;border-radius:50%;border:1px solid var(--line);background:rgba(23,19,15,.55);position:relative;touch-action:none;flex:none}
 #knob{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:rgba(230,220,196,.28);border:1px solid var(--dim)}
@@ -109,12 +109,12 @@ body{
 #endTitle.bad{color:var(--alert)} #endTitle.good{color:var(--ok)}
 #codec{
   position:fixed;z-index:4;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));
-  bottom:calc(env(safe-area-inset-bottom,0px) + 12px);background:rgba(3,19,10,.95);border:1px solid var(--crt);
-  padding:12px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;cursor:pointer;color:#c8f5d8;
-  box-shadow:0 0 18px rgba(88,214,141,.2)
+  bottom:calc(env(safe-area-inset-bottom,0px) + 12px);background:rgba(28,20,14,.96);border:1px solid var(--crt);
+  padding:12px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;cursor:pointer;color:#f4ead0;
+  box-shadow:0 4px 18px rgba(0,0,0,.5)
 }
-#codec .hd{grid-column:1/-1;display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--crt);letter-spacing:.12em;border-bottom:1px solid rgba(88,214,141,.35);padding-bottom:4px}
-#codec canvas{width:64px;height:64px;image-rendering:pixelated;border:1px solid var(--crt);background:#06210f}
+#codec .hd{grid-column:1/-1;display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--crt);letter-spacing:.12em;border-bottom:1px solid rgba(201,164,90,.35);padding-bottom:4px}
+#codec canvas{width:64px;height:64px;image-rendering:pixelated;border:1px solid var(--crt);background:#2a1d14;border-radius:6px}
 #codec .who{font-size:12px;color:#ffd24a;margin-bottom:4px;letter-spacing:.1em}
 #codec .txt{font-size:15px;line-height:1.7;height:8.5em;overflow:hidden}
 #codec .who{height:1.4em;overflow:hidden}
@@ -158,7 +158,7 @@ body{
 <div id="ui">
   <div class="top">
     <div class="left">
-      <div id="status" class="chip" data-s="ok">潜入中</div>
+      <div id="status" class="chip" data-s="ok">忍び足</div>
       <div class="info" id="stg">STAGE 1/5</div>
       <div class="info" id="obj">目標: <b>ぼたもちを回収</b></div>
       <div class="row"><div id="clock">00:00</div><div class="life">LIFE<i><b id="lifeBar"></b></i></div></div>
@@ -177,7 +177,7 @@ body{
     </div>
   </div>
 </div>
-<div class="hintkeys">WASD 移動 ・ Shift 走る ・ J 使用 ・ 1-5 / Q E 切替 ・ Space 段ボール ・ P 一時停止</div>
+<div class="hintkeys">WASD 移動 ・ Shift 走る ・ J 使用 ・ 1-5 / Q E 切替 ・ Space 樽 ・ P 一時停止</div>
 <div id="bubbles"></div>
 <div id="flash"></div>
 <div id="toast"></div>
@@ -186,7 +186,7 @@ body{
 <div id="pause" class="screen" hidden><h1>一時停止</h1><button class="go" id="resume">再開</button><button class="go sub" id="toTitle">タイトルへ戻る</button></div>
 
 <div id="codec" hidden>
-  <div class="hd"><span>☎ 黒電話</span><span>140.85</span></div>
+  <div class="hd"><span>☎ 黒電話</span><span>ケンちゃん宅から</span></div>
   <canvas id="pA" width="32" height="32"></canvas>
   <div><div class="who" id="who"></div><div class="txt" id="txt"></div></div>
   <canvas id="pB" width="32" height="32"></canvas>
@@ -194,8 +194,8 @@ body{
 </div>
 
 <div id="title" class="screen">
-  <div class="tk">TACTICAL GRANNY ESPIONAGE</div>
-  <h1>ババア<br>ソリッド</h1>
+  <div class="tk">SHOWA STEALTH COMEDY</div>
+  <h1>忍び足<br>ババア</h1>
   <div class="yr">昭和四十三年 町内会潜入作戦</div>
   <div class="modes">
     <button class="go" id="start">PUSH START</button>
@@ -203,7 +203,7 @@ body{
     <div id="chapters" hidden></div>
   </div>
   <div class="rank" id="rankT"></div>
-  <p class="rule">背後から杖でゴツンと一撃。入れ歯ブーメラン、飴玉のおとり、煙玉、おにぎりで体力回復。<br>段ボールをかぶって止まれば気づかれにくい。走ると足音でバレる。<br>右下のアイテムボタン: 短タップで使用、長押し+スライドで切り替え。</p>
+  <p class="rule">背後から杖でゴツンと一撃。入れ歯ブーメラン、飴玉のおとり、煙玉、おにぎりで体力回復。<br>漬物樽をかぶって止まれば気づかれにくい。走ると足音でバレる。<br>右下のアイテムボタン: 短タップで使用、長押し+スライドで切り替え。</p>
 </div>
 
 <div id="end" class="screen" hidden>
@@ -216,7 +216,7 @@ body{
 
 <div id="adbox" class="screen" hidden>
   <div class="tk">ADVERTISEMENT ・ 広告</div>
-  <div class="adslot" id="adSlot"><b>ババアソリッド</b><span>広告枠（テスト表示）<br>公開版ではここに広告が入ります</span></div>
+  <div class="adslot" id="adSlot"><b>忍び足ババア</b><span>広告枠（テスト表示）<br>公開版ではここに広告が入ります</span></div>
   <button class="go sub" id="adSkip" disabled>3</button>
 </div>
 
@@ -403,7 +403,7 @@ function turnTo(cur,target,rate,dt){ var d=wrap(target-cur); var s=rate*dt; retu
 function textTex(txt,color,size){
   return cvTex(128,128,function(x){ x.font='bold '+(size||100)+'px sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.lineWidth=10; x.strokeStyle='#000'; x.strokeText(txt,64,70); x.fillStyle=color; x.fillText(txt,64,70); });
 }
-var TEX_ALERT=textTex('!','#ff4d3d'), TEX_SUS=textTex('?','#ffb020');
+var TEX_ALERT=textTex('コラッ','#ff4d3d',44), TEX_SUS=textTex('?','#ffb020');
 function labelSprite(txt,color,w){
   var t=cvTex(256,64,function(x){ x.font='bold 40px sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.lineWidth=8; x.strokeStyle='#000'; x.strokeText(txt,128,34); x.fillStyle=color; x.fillText(txt,128,34); });
   var s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));
@@ -644,8 +644,10 @@ function animChar(m,gait,mv,t){
 
 var boxMesh=(function(){
   var g=new THREE.Group();
-  var m=new THREE.Mesh(new THREE.BoxGeometry(1.15,1.2,1.15),mat(0xb08a5a)); m.position.y=.6; g.add(m);
-  var tape=new THREE.Mesh(new THREE.BoxGeometry(.2,.02,1.17),mat(0xd8c9a0)); tape.position.y=1.21; g.add(tape);
+  var m=cyl(.56,.5,1.15,0x8a5a32,18); m.position.y=.58; g.add(m);
+  [.22,.94].forEach(function(y){ var h=cyl(.58,.58,.08,0x2a2018,18); h.position.y=y; g.add(h); });
+  var lid=cyl(.5,.5,.06,0xa8743f,18); lid.position.y=1.18; g.add(lid);
+  var stone=sph(.22,0x7a7a72,1.2,.6,1); stone.position.y=1.3; g.add(stone);
   var sh=new THREE.Mesh(new THREE.CircleGeometry(.8,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.3}));
   sh.rotation.x=-Math.PI/2; sh.position.y=.02; g.add(sh);
   g.visible=false; return g;
@@ -658,7 +660,7 @@ var WEAPONS=[
   {id:'denture',name:'入れ歯',n:0,start:2},
   {id:'candy',name:'飴玉',n:0,start:3},
   {id:'smoke',name:'煙玉',n:0,start:1},
-  {id:'box',name:'段ボール',n:0,start:2}
+  {id:'box',name:'漬物樽',n:0,start:2}
 ];
 var P={x:1.5,z:1.5,dir:0,boxed:false,moving:false,running:false,hidden:false,has:false,cool:0,acool:0,atk:0,gait:0,wi:0,charm:0,life:100,inv:0,mesh:null};
 P.mesh=makeGranny({monpe:true,pants:0x39455f,cloth:0x2f3f6a,sleeve:0x2f3f6a,tenugui:0xf2efe6,hair:0xdadde2,glasses:'r',paint:true,cane:true,furoshiki:true,hunch:.26,shoe:0x2a2018});
@@ -712,7 +714,7 @@ var PK_DEF={
   denture:{name:'入れ歯',color:0xf2efe6,hex:'#f2efe6',amt:2},
   smoke:{name:'煙玉',color:0x9aa7b3,hex:'#c4ced8',amt:1},
   charm:{name:'お守り',color:0xffd24a,hex:'#ffd24a',amt:1},
-  box:{name:'段ボール',color:0xb08a5a,hex:'#d8b07a',amt:1},
+  box:{name:'漬物樽',color:0x8a5a32,hex:'#d8b07a',amt:1},
   onigiri:{name:'おにぎり',color:0xf4f1e8,hex:'#f4f1e8',amt:40}
 };
 var PICKS=[];
@@ -722,8 +724,9 @@ function spawnPick(x,z,t){
     var tri=new THREE.Mesh(new THREE.CylinderGeometry(.04,.3,.45,3),mat(0xf4f1e8)); tri.position.y=.3; g.add(tri);
     var nori=bx(.3,.18,.04,0x14201a); nori.position.set(0,.14,.17); g.add(nori);
   } else if(t==='box'){
-    var bb=bx(.6,.5,.6,0xb08a5a); bb.position.y=.3; g.add(bb);
-    var bt=bx(.14,.02,.62,0xd8c9a0); bt.position.y=.56; g.add(bt);
+    var bb=cyl(.3,.27,.55,0x8a5a32,14); bb.position.y=.3; g.add(bb);
+    var bt=cyl(.31,.31,.05,0x2a2018,14); bt.position.y=.45; g.add(bt);
+    var bs=sph(.12,0x7a7a72,1.2,.6,1); bs.position.y=.62; g.add(bs);
   } else {
     var bag=sph(.3,d.color,1,.85,1); bag.position.y=.35; g.add(bag);
     var tie=cyl(.06,.1,.14,0x5a4030,8); tie.position.y=.68; g.add(tie);
@@ -964,7 +967,7 @@ var TK=(function(){
     [K('走ると足音でバレる。急ぎたいときこそ忍び足。'),B('年寄りの忍び足は膝のきしむ音がするけどね。'),K('それは隠して!')],
     [K('ぼたもちは光の柱が目印だよ。'),B('光ってるなら見つけやすいねぇ。'),K('敵からもね…')],
     [K('落ちてるおにぎりは体力回復だよ。'),B('梅かい? おかかかい?'),K('選べないよ、効果は同じ!')],
-    [K('画面の緑のレーダーも見てね。点が敵だよ。'),B('最近のテレビは小さいねぇ。'),K('レーダー!')],
+    [K('右上の町内地図も見てね。赤い点が見張りだよ。'),B('地図なら任せな。この町に六十年住んでるよ。'),K('じゃあ地図いらないじゃん!')],
     [K('失敗しても何度でもやり直せるよ。'),B('人生と違ってお得だね。'),K('急に深いこと言わないで。')]
   ],[
     [K('2面目だね。見張りが増えてるから慎重に。'),B('増えても数えるのは苦手だよ。'),K('数えなくていいから避けて!')],
@@ -972,18 +975,18 @@ var TK=(function(){
     [K('煙玉は敵の視界をさえぎるよ。'),B('お線香の親戚かい?'),K('近いけど違う。')],
     [K('入れ歯ブーメランは当たると戻ってくるよ。'),B('入れ歯が帰ってくると安心するねぇ。'),K('本当に外してるの!?')],
     [K('停電の面は暗いけど、敵の視界も狭くなるよ。'),B('暗いのは慣れてるよ、老眼でね。'),K('理由がちがう。')],
-    [K('段ボールをかぶって止まれば見つかりにくいよ。'),B('引っ越し以来の出番だねぇ。'),K('引っ越し屋さんじゃないよ。')],
+    [K('漬物樽をかぶって止まれば見つかりにくいよ。'),B('ぬか床の匂いがするねぇ。'),K('そこはがまんして!')],
     [K('倒れた仲間を他の敵が見つけると警戒されるよ。'),B('見つけたら起こしてあげるんだろうねぇ。'),K('起こされるのが困るんだ!')],
     [K('回覧板を集める面もあるよ。'),B('回覧板は止めないのが町内会の掟だよ。'),K('今夜は集める側だよ。')],
-    [K('ALERTが出たら、見えなくなるまで逃げ切って。'),B('逃げ足は…膝と相談だね。'),K('膝さんお願い!')],
+    [K('「見つかった!」が出たら、見えなくなるまで逃げ切って。'),B('逃げ足は…膝と相談だね。'),K('膝さんお願い!')],
     [K('お守りを持ってると、倒れても一回だけ復活できるよ。'),B('ありがたいねぇ。拝んでおくよ。'),K('拝むより拾って!')]
   ],[
     [K('3面は停電があるかも。暗い中は足元に注意。'),B('ろうそくならあるよ。'),K('光ったら見つかるからやめて!')],
     [K('敵が増えて、足も速くなってるよ。'),B('最近の若いのは元気だねぇ。'),K('敵もババアだよ。')],
     [K('背後攻撃が一番強いよ。正面だと少しひるむだけ。'),B('正面は礼儀がなってないねぇ。'),K('礼儀じゃなくて作戦!')],
-    [K('敵が探してる間はEVASIONって出るよ。'),B('エ…エバ…?'),K('「まだ疑ってる」ってこと。')],
+    [K('敵が探してる間は「探されてる」って出るよ。'),B('かくれんぼだね。昔は町内一だったよ。'),K('今夜も町内一でいてね!')],
     [K('煙の中なら敵はせき込んで動けなくなるよ。'),B('焼き鳥屋の前を通った私だね。'),K('例えがおいしそう。')],
-    [K('段ボールの中でも動くと見つかりやすいよ。'),B('箱の中でラジオ体操は無理かい?'),K('絶対だめ!')],
+    [K('樽の中でも動くと見つかりやすいよ。'),B('樽の中でラジオ体操は無理かい?'),K('絶対だめ!')],
     [K('飴玉の音に敵が寄っていくよ。その隙に回り込んで。'),B('飴で釣るなんて、昔の孫みたいだねぇ。'),K('ぼくは釣られてないよ…たぶん。')],
     [K('走ると足音の輪が広がるよ。輪の中の敵に気づかれる。'),B('年のわりに存在感があるねぇ。'),K('ポジティブだね。')],
     [K('煙玉も入れ歯も、拾えるものは拾っておこう。'),B('もったいないお化けが出るからね。'),K('昭和だなぁ…')],
@@ -994,7 +997,7 @@ var TK=(function(){
     [K('2人以上に気づかれると厄介だよ。'),B('井戸端会議が始まるからね。'),K('一気に広まる…')],
     [K('勝手口は目標を達成すると光るよ。'),B('勝手に開く口かい。'),K('勝手口はドアだよ!')],
     [K('倒した敵は22秒で起きちゃう。早めに離れて。'),B('昼寝にしては短いねぇ。'),K('熟睡させる道具はないんだ。')],
-    [K('段ボールは予備を持っておくと安心だよ。'),B('箱は取っておく派だよ。'),K('押し入れのは出さないで。')],
+    [K('漬物樽は予備を持っておくと安心だよ。'),B('樽は取っておく派だよ。'),K('台所のぬか漬けは出さないで。')],
     [K('入れ歯ブーメランは戻ってきたら補充されるよ。'),B('外した入れ歯を拾いに行く…笑えるねぇ。'),K('笑えないよ!?')],
     [K('ここまで来たら上級者だよ!'),B('まだお茶も飲んでないよ。'),K('休憩しないで!')],
     [K('ノーアラートで進むと高得点だよ。'),B('点数が高いと景品は出るかい?'),K('ランキングに載るだけ。')],
@@ -1035,7 +1038,7 @@ var HELP=[
   ['ケンちゃん','ばあちゃん、道具の使い方を説明するね。右下の大きいボタンが「アイテムボタン」だよ。'],
   ['ケンちゃん','ちょん、と短くタップすると、いま選んでる道具を使うよ。最初は杖。背後からならゴツンで一撃!'],
   ['ケンちゃん','道具を変えたいときは、ボタンを長押し。上にリストが出るから、指を上下にスライドして、離したところが決定だよ。'],
-  ['ケンちゃん','段ボールも道具の一つ。選んでタップでかぶって、もう一度タップで脱ぐ。止まっていれば見つかりにくいよ。'],
+  ['ケンちゃん','漬物樽も道具の一つ。選んでタップでかぶって、もう一度タップで脱ぐ。止まっていれば見つかりにくいよ。'],
   ['ばあちゃん','長押しで選んで、離して決める。タップで使う。ふむふむ、わかったよ。']
 ];
 var MNAME={steal:'ぼたもちを取り戻せ',collect:'回覧板を集めろ',ko:'夜回りを黙らせろ',boss:'町内会長を討て'};
@@ -1166,7 +1169,7 @@ function beep(freq,dur,type,vol,slideTo,delay){
   o.connect(g); g.connect(master||AC.destination); o.start(t); o.stop(t+dur+.02);
 }
 var sfx={
-  alert:function(){beep(1760,.09,'square',.08);beep(1318,.09,'square',.08,null,.09);beep(1760,.28,'square',.09,880,.18);},
+  alert:function(){beep(2350,.12,'sine',.1,2500);beep(2350,.4,'sine',.1,2450,.17);beep(3100,.05,'square',.02,null,.17);},
   box:function(){beep(220,.08,'triangle',.1,110);},
   pick:function(){[660,830,990,1320].forEach(function(f,i){beep(f,.14,'sine',.09,null,i*.08)});},
   caught:function(){beep(500,.6,'sawtooth',.08,80);},
@@ -1327,7 +1330,7 @@ function setBox(on){
 }
 function toggleBox(){
   if(P.cool>0) return;
-  if(!P.boxed){ var bw=WEAPONS[4]; if(bw.n<=0){ toast('段ボールがない'); return; } bw.n--; }
+  if(!P.boxed){ var bw=WEAPONS[4]; if(bw.n<=0){ toast('漬物樽がない'); return; } bw.n--; }
   P.cool=.45; sfx.box(); setBox(!P.boxed);
   if(P.boxed) say(P,'よっこいしょ',1.2);
 }
@@ -1497,7 +1500,7 @@ function updateProjs(dt){
 
 /* ---------- Codec (黒電話) ---------- */
 function portrait(cv,who,open){
-  var x=cv.getContext('2d'); x.fillStyle='#06210f'; x.fillRect(0,0,32,32);
+  var x=cv.getContext('2d'); x.fillStyle='#3a2a1c'; x.fillRect(0,0,32,32);
   function r(c,a,b,w,h){x.fillStyle=c;x.fillRect(a,b,w,h);}
   if(who==='granny'){
     r('#dadde2',9,5,14,8); r('#dadde2',13,2,6,4); r('#f1c9a5',10,10,12,14); r('#dadde2',9,10,2,6); r('#dadde2',21,10,2,6);
@@ -1523,7 +1526,7 @@ function portrait(cv,who,open){
     r('#c86a5a',14,21,4,1); if(open) r('#5a1a14',14,21,4,2);
     r(cl,8,24,16,8); if(who==='tatsu') r('#c8372d',15,25,2,7); if(who==='elder') r('#e8c55a',12,24,8,2);
   }
-  x.fillStyle='rgba(88,214,141,.12)'; for(var y=0;y<32;y+=2) x.fillRect(0,y,32,1);
+  x.fillStyle='rgba(255,210,150,.07)'; for(var y=0;y<32;y+=3) x.fillRect(0,y,32,1);
 }
 var C={full:'',shown:0,acc:0,delay:0,speaker:'',flap:0,open:false};
 function drawPortraits(){
@@ -1602,7 +1605,11 @@ $('chapters').addEventListener('click',function(e){ var b=e.target.closest('butt
 /* ---------- Ads: ステージクリア毎・ゲームオーバー毎のインタースティシャル ----------
    provider: 'house' = テスト用の自前広告枠 / 'adsense' = AdSense H5ゲーム広告 (adBreak) / 'crazygames' = CrazyGames SDK v3 / 'none' = 広告なし
    公開版では AD_CONFIG を書き換える。adsenseClient には 'ca-pub-...' を入れる。 */
-var AD_CONFIG={provider:'house', adsenseClient:'', adsenseTest:true};
+var AD_CONFIG={provider:'auto', adsenseClient:'', adsenseTest:true};
+(function(){ if(AD_CONFIG.provider!=='auto') return; var h=location.hostname||'';
+  AD_CONFIG.provider=/crazygames/i.test(h)||/[?&]cg=1/.test(location.search)?'crazygames':(/github\.io$/i.test(h)?'none':'house'); })();
+var cgPlaying=false;
+function cgGameplay(on){ if(on===cgPlaying||!ADS.cg) return; cgPlaying=on; try{ if(on) ADS.cg.game.gameplayStart(); else ADS.cg.game.gameplayStop(); }catch(e){} }
 var ADS={ready:false,busy:false,cg:null};
 function initAds(){
   var c=AD_CONFIG;
@@ -1680,14 +1687,14 @@ function continueOrRetry(){
 function showEnding(){
   hideScreens(); G.mode='ending'; $('ending').hidden=false; sfx.win();
   var c=$('crawl');
-  c.innerHTML=ENDING.map(function(l){ return '<p>'+l+'</p>'; }).join('')+'<h2>ババアソリッド<br>完</h2>'+
+  c.innerHTML=ENDING.map(function(l){ return '<p>'+l+'</p>'; }).join('')+'<h2>忍び足ババア<br>完</h2>'+
     '<div class="staff"><b>作戦指揮</b><br>ケンちゃん<br><br><b>潜入工作員</b><br>キヨばあちゃん<br><br><b>友情出演</b><br>ウメさん ・ 鬼瓦タツ子<br><br><b>大長老</b><br>ハル姉さん<br><br><b>協力</b><br>夜回りババア隊の皆さん<br><br>…みんな、こしあん派とつぶあん派で<br>今も揉めているそうな。<br><br><br>THANK YOU FOR PLAYING</div>';
   c.style.animation='none'; void c.offsetWidth; c.style.animation='';
   $('skipEnding').textContent='タイトルへ';
 }
 function fmt(s){ var m=Math.floor(s/60),x=Math.floor(s%60); return (m<10?'0':'')+m+':'+(x<10?'0':'')+x; }
 var PAR=[150,170,170,190,210];
-function animal(sc){ return sc>=12000?'S フクロウ':(sc>=9000?'A ネコ':(sc>=6000?'B タヌキ':'C ニワトリ')); }
+function animal(sc){ return sc>=12000?'S 特上ぼたもち':(sc>=9000?'A 上ぼたもち':(sc>=6000?'B 並ぼたもち':'C 焦げぼたもち')); }
 function stageClear(){
   G.adPending='stage_clear'; G.mode='end'; sfx.win(); $('end').hidden=false;
   var tb=Math.max(0,Math.round((PAR[R.stage-1]-G.time)*8)), st=G.alerts===0?800:0, ko=G.stageKos*150, lf=Math.round(P.life*4), base=1000+R.stage*200;
@@ -1894,42 +1901,39 @@ function updateGuardVisual(g,dt,t){
   else g.mark.visible=false;
 }
 
-/* ---------- Radar (soliton style) / HUD ---------- */
+/* ---------- 町内地図 / HUD ---------- */
 var radar=$('radar'), rx=radar.getContext('2d');
 function drawRadar(t){
   var S=2.9, cx=64, cy=48;
-  rx.fillStyle='#03130a'; rx.fillRect(0,0,128,96);
-  rx.strokeStyle='rgba(88,214,141,.12)'; rx.lineWidth=1;
+  rx.fillStyle='#e8dcc0'; rx.fillRect(0,0,128,96);
+  rx.strokeStyle='rgba(106,74,48,.15)'; rx.lineWidth=1;
   for(var gx=0;gx<128;gx+=16){ rx.beginPath(); rx.moveTo(gx+.5,0); rx.lineTo(gx+.5,96); rx.stroke(); }
   for(var gy=0;gy<96;gy+=16){ rx.beginPath(); rx.moveTo(0,gy+.5); rx.lineTo(128,gy+.5); rx.stroke(); }
   function X(x){return cx+(x-P.x)*S;} function Y(z){return cy+(z-P.z)*S;}
-  solids.forEach(function(b){ rx.fillStyle=b.kind==='wall'?'#1f8a4c':'#16603a'; rx.fillRect(X(b.x0),Y(b.z0),(b.x1-b.x0)*S,(b.z1-b.z0)*S); });
-  smokes.forEach(function(s){ rx.fillStyle='rgba(170,200,180,.35)'; rx.beginPath(); rx.arc(X(s.x),Y(s.z),s.r*S,0,6.3); rx.fill(); });
+  solids.forEach(function(b){ rx.fillStyle=b.kind==='wall'?'#5a3a24':'#b8986a'; rx.fillRect(X(b.x0),Y(b.z0),(b.x1-b.x0)*S,(b.z1-b.z0)*S); });
+  smokes.forEach(function(s){ rx.fillStyle='rgba(120,120,120,.3)'; rx.beginPath(); rx.arc(X(s.x),Y(s.z),s.r*S,0,6.3); rx.fill(); });
   guards.forEach(function(g){
-    if(g.state==='ko'||g.state==='stun'){ rx.fillStyle='#4a6a58'; rx.fillRect(X(g.x)-2,Y(g.z)-2,4,4); return; }
-    var c=g.state==='chase'?'#ff4a3a':(g.state==='search'||g.meter>.2?'#ffb020':'#e8f08a');
-    rx.fillStyle=c; rx.globalAlpha=.4; rx.beginPath(); rx.moveTo(X(g.x),Y(g.z));
+    if(g.state==='ko'||g.state==='stun'){ rx.fillStyle='#9a8a7a'; rx.fillRect(X(g.x)-2,Y(g.z)-2,4,4); return; }
+    var c=g.state==='chase'?'#d0201a':(g.state==='search'||g.meter>.2?'#e07a10':'#c8372d');
+    rx.fillStyle=c; rx.globalAlpha=.22; rx.beginPath(); rx.moveTo(X(g.x),Y(g.z));
     rx.arc(X(g.x),Y(g.z),g.vr*S*.6,Math.PI/2-g.dir-FOV,Math.PI/2-g.dir+FOV); rx.closePath(); rx.fill(); rx.globalAlpha=1;
-    rx.fillRect(X(g.x)-2,Y(g.z)-2,4,4);
+    rx.beginPath(); rx.arc(X(g.x),Y(g.z),2.4,0,6.3); rx.fill();
   });
-  M.items.forEach(function(it){ if(!it.taken){ rx.fillStyle='#ffb020'; rx.fillRect(X(it.x)-2,Y(it.z)-2,4,4); } });
-  if(M.done){ rx.strokeStyle='#8fd9a8'; rx.strokeRect(X(EXIT.x)-3,Y(EXIT.z)-3,6,6); }
-  rx.fillStyle='#fff'; rx.fillRect(cx-2,cy-2,4,4);
-  var a=t*2.2, grd=rx.createLinearGradient(cx,cy,cx+Math.cos(a)*70,cy+Math.sin(a)*70);
-  grd.addColorStop(0,'rgba(120,255,170,.4)'); grd.addColorStop(1,'rgba(120,255,170,0)');
-  rx.strokeStyle=grd; rx.lineWidth=2; rx.beginPath(); rx.moveTo(cx,cy); rx.lineTo(cx+Math.cos(a)*70,cy+Math.sin(a)*70); rx.stroke();
-  rx.fillStyle='#58d68d'; rx.font='8px monospace'; rx.fillText('RADAR',3,9);
+  M.items.forEach(function(it){ if(!it.taken){ rx.fillStyle='#e08a10'; rx.font='bold 9px sans-serif'; rx.fillText('★',X(it.x)-4,Y(it.z)+3); } });
+  if(M.done){ rx.strokeStyle='#2f7a4a'; rx.lineWidth=2; rx.strokeRect(X(EXIT.x)-3,Y(EXIT.z)-3,6,6); }
+  rx.fillStyle='#2a4a8a'; rx.beginPath(); rx.arc(cx,cy,3,0,6.3); rx.fill();
+  rx.fillStyle='#5a3a24'; rx.font='bold 9px sans-serif'; rx.fillText('町内地図',3,10);
 }
 var statusEl=$('status'), clockEl=$('clock'), lifeBar=$('lifeBar'), lastStatus='';
 var flashEl=$('flash'), stgEl=$('stg'), stgLast='';
 function updateHud(dt,t){
-  var s='ok',txt='潜入中',cd=0;
+  var s='ok',txt='忍び足',cd=0;
   guards.forEach(function(g){
     if(g.state==='chase'){ s='alert'; cd=Math.max(cd,g.timer); }
-    else if(s!=='alert'&&(g.state==='search'||(g.state==='patrol'&&g.meter>.2))){ s='warn'; if(g.state==='search') txt='EVASION'; else if(txt!=='EVASION') txt='警戒'; }
+    else if(s!=='alert'&&(g.state==='search'||(g.state==='patrol'&&g.meter>.2))){ s='warn'; if(g.state==='search') txt='探されてる'; else if(txt!=='探されてる') txt='怪しまれてる'; }
   });
-  if(s==='alert') txt='ALERT '+Math.ceil(cd);
-  else if(P.boxed&&s==='ok') txt='潜入中(箱)';
+  if(s==='alert') txt='見つかった! '+Math.ceil(cd);
+  else if(P.boxed&&s==='ok') txt='樽の中';
   if(txt!==lastStatus){ statusEl.textContent=txt; statusEl.dataset.s=s; lastStatus=txt; }
   clockEl.textContent=fmt(G.time);
   var stt='STAGE '+R.stage+'/'+R.total+' ・ SCORE '+R.score; if(stt!==stgLast){ stgEl.textContent=stt; stgLast=stt; }
@@ -1968,6 +1972,7 @@ function loop(now){
     for(var i=0;i<guards.length;i++){ if(G.mode!=='play') break; stepGuard(guards[i],dt); }
   }
   updateCodec(dt);
+  cgGameplay(G.mode==='play');
   var anyChase=guards.some(function(g){return g.state==='chase'});
   bgmUpdate(dt,G.mode==='play'||G.mode==='codec',anyChase);
   guards.forEach(function(g){updateGuardVisual(g,dt,tAnim)});

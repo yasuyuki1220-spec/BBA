@@ -1,26 +1,28 @@
-# ババアソリッド 公開手順
+# 忍び足ババア 公開手順（CrazyGames）
 
 ## 広告の出るタイミング
 - ステージ（章）クリア後、次へ／タイトルへ のボタンを押したとき
 - ゲームオーバー（作戦失敗）後、再挑戦／タイトルへ のボタンを押したとき
 
-## 広告の切り替え（index.html 内の `AD_CONFIG`）
-```js
-var AD_CONFIG={provider:'house', adsenseClient:'', adsenseTest:true};
-```
-| provider | 内容 |
+## 広告の自動切り替え（`AD_CONFIG.provider:'auto'`）
+| 公開場所 | 動き |
 |---|---|
-| `house` | テスト用の広告枠（3秒後に閉じられる）。今の設定 |
-| `adsense` | Google AdSense の H5 ゲーム広告（`adBreak`）。`adsenseClient` に `ca-pub-...` を入れる。本番では `adsenseTest:false` |
-| `crazygames` | CrazyGames に投稿する場合（CrazyGames SDK v3） |
-| `none` | 広告なし |
+| CrazyGames 上（ホスト名に crazygames を含む、または URL に `?cg=1`） | CrazyGames SDK v3 の midgame 広告。プレイ中は `gameplayStart/Stop` を送る |
+| GitHub Pages（`*.github.io`） | 広告なし |
+| それ以外（claude.ai のアーティファクトなど） | テスト用の広告枠 |
 
-## A. 自分のサイトで公開（GitHub Pages + AdSense）
-1. GitHub のリポジトリ → Settings → Pages → Source を「GitHub Actions」にする
-2. master に push すると `https://yasuyuki1220-spec.github.io/BBA/` に公開される
-3. AdSense は `github.io` のサブドメインでは審査が通らないので、独自ドメインを取得して Pages の Custom domain に設定する
-4. AdSense の審査に通り、H5 ゲーム広告（Ad placement API）が使えるようになったら、`provider:'adsense'` とパブリッシャーIDを設定し、ルートに `ads.txt` を置く
+## 投稿用 zip の作り方
+```
+./build.sh   # → dist/shinobiashi-babaa.zip（three.js 同梱）
+```
 
-## B. ゲームサイトに投稿（CrazyGames など）
-- `provider:'crazygames'` にして、CrazyGames Developer Portal から投稿する。広告の配信と収益の分配はサイト側が行う
-- 投稿先の規約（ほかの広告ネットワークの併用禁止など）を確認すること
+## 投稿の流れ
+1. CrazyGames Developer Portal（developer.crazygames.com）でアカウントを作る
+2. 「Submit game」から `shinobiashi-babaa.zip` をアップロードする（形式は HTML5）
+3. タイトル・説明文・サムネイル画像・操作方法を入力する（英語の説明も用意するとよい）
+4. Preview で「?cg=1」なしでも CrazyGames 上なら広告が呼ばれることを確認する
+5. 審査を待つ
+
+## 注意
+- フォントは Google Fonts から読み込んでいるので、オフラインだとシステムフォントになる
+- 進行状況はブラウザの localStorage に保存される
