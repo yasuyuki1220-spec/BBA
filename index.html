@@ -180,8 +180,8 @@ input.tx:focus-visible{outline:2px solid var(--warn)}
 .parade span b{font-weight:normal;margin-right:22px;display:inline-block;animation:hop .6s ease-in-out infinite alternate}
 @keyframes parade{to{transform:translateX(-100%)}}
 @keyframes hop{to{transform:translateY(-5px)}}
-#cutin{position:fixed;left:0;right:0;top:28%;height:96px;z-index:4;pointer-events:none;overflow:hidden;visibility:hidden}
-#cutin.go,#cutin.hold{visibility:visible}
+#cutin{position:fixed;left:0;right:0;top:28%;height:96px;z-index:4;pointer-events:none;overflow:hidden;display:none}
+#cutin.go,#cutin.hold{display:block}
 #cutin.hold{top:auto;bottom:14%}
 #cutin.hold .band{animation:cutHold .5s cubic-bezier(.12,.9,.25,1) forwards}
 #cutin.hold b{color:#2a1400;text-shadow:2px 2px 0 #fff}
@@ -2405,7 +2405,8 @@ function touchHit(f,R,dmg,kb,cd,how,col,stun){
 function cutIn(name,sp,hex,label,hold){
   var el=$('cutin'); if(!el) return;
   el.style.setProperty('--c',hex); $('cutN').textContent=label||(name+' の必殺'); $('cutS').textContent=sp+'!';
-  el.classList.remove('go'); el.classList.remove('hold'); void el.offsetWidth; el.classList.add(hold?'hold':'go');
+  clearTimeout(cutIn.tm); el.classList.remove('go'); el.classList.remove('hold'); void el.offsetWidth; el.classList.add(hold?'hold':'go');
+  if(!hold) cutIn.tm=setTimeout(function(){ el.classList.remove('go'); },820);
   var w=$('wflash'); w.classList.remove('go'); void w.offsetWidth; w.classList.add('go');
 }
 function slashFx(x,z,dir,col,rad){
@@ -3041,7 +3042,7 @@ function showResults(timeout){
   if(me&&win===me) sfx.win(); else sfx.caught();
   if(win.state==='ko'){ win.state='ok'; win.out=false; win.mesh.visible=true; win.u.inner.rotation.set(0,0,0); win.u.fall=0; if(win.kx!==undefined){ win.x=win.kx; win.z=win.kz; } }
   G.winF=win; clearConfetti(); spawnConfetti(win); sfx.popper(); $('ui').hidden=true; cutIn(win.name,win.name+' の勝ち','#ffd23a','WINNER',true);
-  setTimeout(function(){ if(G.mode==='end') $('end').hidden=false; },3400);
+  setTimeout(function(){ if(G.mode==='end'){ $('end').hidden=false; $('cutin').classList.remove('hold'); } },3400);
 }
 
 /* ---------- Screens ---------- */
