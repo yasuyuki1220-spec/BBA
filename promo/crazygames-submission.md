@@ -7,7 +7,7 @@
 - 向き: 縦・横どちらでも遊べる
 - 言語: 誰が開いても最初は英語。タイトル右上のボタンで日本語に切り替えられる（選んだ言語は保存）（URL に `?lang=en` / `?lang=ja` でも指定可）
 - 最初の3試合は画面下に操作の案内（動く → 拾う → 攻撃 → 必殺）が出る
-- オンライン: 合言葉（5けたの数字）で最大15人。CrazyGames 上では「友だちを招待」ボタンと招待リンクに対応
+- オンライン: クイック対戦（自動マッチング）と、合言葉（5けたの数字）の部屋。最大15人。CrazyGames 上では「友だちを招待」ボタンと招待リンクに対応
 - 投稿ファイル: `./build.sh` で作る `dist/town-smashers.zip`（three.js と PeerJS を同梱）
 
 ## 説明文（English）
@@ -20,7 +20,7 @@ Grab a giant radish, throw pepper to make everyone sneeze, sweep rivals away wit
 - Grab the rare golden item to unleash a character-specific super move: one-hit golden paper fan, giant pickle stone, disco mirror ball, laser sword, homing missiles and more
 - 4 stages with live gimmicks: a cleaning robot and time sales at the supermarket, a patrolling teacher at school, sprinklers in the park and a giant claw machine in the arcade
 - Zombie bites spread the infection!
-- Play solo against CPUs, or create a room and invite friends with a 5-digit code
+- Play solo against CPUs, jump into a Quick Match with anyone, or create a room and invite friends with a 5-digit code
 - Earn cosmetic footprint trails by playing (they never make you stronger)
 
 **Controls:**
