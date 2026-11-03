@@ -3498,7 +3498,7 @@ function render(dt){
 }
 $('rankT').textContent=recText();
 $('parade').innerHTML=CH_KEYS.map(function(k,i){ return '<b style="color:'+SLOTC[i%SLOTC.length]+';animation-delay:'+(i*.08)+'s">'+CH[k].n+'</b>'; }).join('');
-if(/[?&]debug/.test(location.search)) window.__B={F:F,G:G,SET:SET,NET:NET,FLOOR:FLOOR,PROJ:PROJ,SOURCES:SOURCES,STAGES:STAGES,CH:CH,beginFight:beginFight,startMatchWith:startMatchWith,giveItem:giveItem,activateSpecial:activateSpecial,aud:function(){ return {ac:AC?AC.state:null,key:MUS.key,step:MUS.step,gain:MUS.gain?+MUS.gain.gain.value.toFixed(2):null,mode:G.mode}; },gimInit:gimInit,SP:SP,CLOUDS:CLOUDS,setStatus:setStatus,spawnCloud:spawnCloud,infect:infect,localRoster:localRoster,
+if(/[?&]debug/.test(location.search)) window.__B={F:F,G:G,SET:SET,NET:NET,FLOOR:FLOOR,PROJ:PROJ,SOURCES:SOURCES,STAGES:STAGES,CH:CH,beginFight:beginFight,startMatchWith:startMatchWith,giveItem:giveItem,activateSpecial:activateSpecial,popText:popText,puff:puff,makeItemModel:makeItemModel,scene:scene,aud:function(){ return {ac:AC?AC.state:null,key:MUS.key,step:MUS.step,gain:MUS.gain?+MUS.gain.gain.value.toFixed(2):null,mode:G.mode}; },gimInit:gimInit,SP:SP,CLOUDS:CLOUDS,setStatus:setStatus,spawnCloud:spawnCloud,infect:infect,localRoster:localRoster,
   renderAudio:function(list,rate){
     var save=[AC,master,MUS.gain,MUS.nb,G.mode], bufs=[];
     function one(i){
