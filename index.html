@@ -167,6 +167,8 @@ input.tx:focus-visible{outline:2px solid var(--warn)}
 #charDesc b{color:var(--fg);font-weight:normal}
 #resList>div small{color:var(--dim);font-size:11px}
 #pauseNote{font-size:13px}
+.chips button.locked{opacity:.6}
+#rwBtn{margin-top:8px;font-size:14px;padding:8px 16px;border-color:var(--pop);color:var(--pop)}
 #title h1.logo{animation:logoBob 1.4s ease-in-out infinite;transform-origin:50% 60%}
 @keyframes logoBob{0%,100%{transform:rotate(-3deg) scale(1)}25%{transform:rotate(2deg) scale(1.06) translateY(-4px)}50%{transform:rotate(3deg) scale(1)}75%{transform:rotate(-2deg) scale(1.06) translateY(-4px)}}
 #title .yr{animation:yrHue 2.4s linear infinite}
@@ -262,6 +264,7 @@ input.tx:focus-visible{outline:2px solid var(--warn)}
   <div id="joinBox" class="opt" hidden><div>合言葉（5けたの数字）</div><div class="joinrow"><input class="tx" id="codeIn" inputmode="numeric" maxlength="5" autocomplete="off" placeholder="12345"><button class="go big" id="joinGo">入る</button></div><div id="joinMsg"></div></div>
   <div class="opt"><div>なまえ</div><input class="tx" id="nameIn" maxlength="8" placeholder="なまえ" autocomplete="off"></div>
   <div class="opt"><div>キャラクター</div><div class="chips" id="optChar"></div><div id="charDesc"></div></div>
+  <div class="opt"><div>足あとエフェクト（見た目だけ・強さは変わらない）</div><div class="chips" id="optTrail"></div><button class="go sub" id="rwBtn" hidden>▶ 広告を見て1つもらう</button></div>
   <div id="hostOpts">
     <div class="opt"><div>ステージ</div><div class="chips" id="optStage"></div></div>
     <div class="opt"><div id="nLabel">人数（あなた＋CPU）</div><div class="chips" id="optN"></div></div>
@@ -796,12 +799,12 @@ function initAds(){
       window.adConfig({preloadAdBreaks:'on',sound:'on'}); ADS.ready=true;
     } else if(c.provider==='crazygames'){
       var s2=document.createElement('script'); s2.src='https://sdk.crazygames.com/crazygames-sdk-v3.js';
-      s2.onload=function(){ try{ window.CrazyGames.SDK.init().then(function(){ ADS.cg=window.CrazyGames.SDK; ADS.ready=true; }); }catch(e){} };
+      s2.onload=function(){ try{ window.CrazyGames.SDK.init().then(function(){ ADS.cg=window.CrazyGames.SDK; ADS.ready=true; cgReady(); }); }catch(e){} };
       document.head.appendChild(s2);
     } else if(c.provider==='house') ADS.ready=true;
   }catch(e){}
 }
-function adAudio(off){ if(master) master.gain.value=(off||muted)?0:1; }
+function adAudio(off){ if(master) master.gain.value=(off||muted||(typeof CGX!=='undefined'&&CGX.mute))?0:1; }
 function showAd(name,done){
   var fin=false; function finish(){ if(fin) return; fin=true; ADS.busy=false; adAudio(false); done(); }
   if(ADS.busy||!ADS.ready||AD_CONFIG.provider==='none'){ done(); return; }
@@ -1417,7 +1420,7 @@ function makeFighter(slot,r){
   scene.add(m);
   var tag=document.createElement('div'); tag.className='tag'+(r.local&&r.pad===0?' me':'');
   tag.innerHTML='<b style="color:'+hex+'">'+esc(r.name)+'</b><i><u></u></i>'; tagsEl.appendChild(tag);
-  var f={slot:slot,type:r.type,C:C,name:r.name,cn:C.n,hex:hex,col:col,human:!!r.human,local:!!r.local,pid:r.pid||null,pad:r.pad===undefined?-1:r.pad,mesh:m,u:u,tag:tag,tagU:tag.querySelector('u'),bubM:bub,blindM:bl,
+  var f={trail:cosDef(r.trail)?r.trail||'':'',slot:slot,type:r.type,C:C,name:r.name,cn:C.n,hex:hex,col:col,human:!!r.human,local:!!r.local,pid:r.pid||null,pad:r.pad===undefined?-1:r.pad,mesh:m,u:u,tag:tag,tagU:tag.querySelector('u'),bubM:bub,blindM:bl,
     x:0,z:0,tx:0,tz:0,tdir:0,dir:0,vx:0,vz:0,hp:C.hp,maxHp:C.hp,stocks:G.stock,state:'ok',out:false,place:0,held:null,heldMesh:null,heldKey:'',
     acd:0,atkT:0,atkDur:.28,atkHit:true,atkDef:null,combo:0,comboT:0,dodgeT:0,dodgeCd:0,ddx:0,ddz:0,rushT:0,rushHit:[],sprayN:0,sprayT:0,
     inv:0,hitstun:0,immune:0,eff:{sneeze:0,dizzy:0,slip:0,bubble:0,pigeon:0,blind:0,slow:0},sneezeT:0,zombieT:0,
@@ -2665,6 +2668,96 @@ function winnerPose(f,dt){
   u.legs[0].rotation.x=-hop*.3; u.legs[1].rotation.x=-hop*.3;
 }
 
+/* ---------- CrazyGames platform hooks ---------- */
+var CGX={mute:false,inviteShown:false};
+function cgCall(fn){ try{ if(ADS.cg) return fn(ADS.cg); }catch(e){} }
+function cgReady(){
+  cgCall(function(sdk){ sdk.game.loadingStart(); sdk.game.loadingStop(); });
+  cgCall(function(sdk){
+    var upd=function(){ CGX.mute=!!(sdk.game.settings&&sdk.game.settings.muteAudio); adAudio(false); };
+    upd(); if(sdk.game.addSettingsChangeListener) sdk.game.addSettingsChangeListener(upd);
+  });
+  var room=null;
+  cgCall(function(sdk){ if(sdk.game.getInviteParam) room=sdk.game.getInviteParam('room'); });
+  if(room&&/^\d{5}$/.test(room)&&!NET.on){ openSetup('join'); $('codeIn').value=room; joinMsg('名前とキャラを選んで「入る」を押してね'); return; }
+  var inst=false; cgCall(function(sdk){ inst=!!sdk.game.isInstantMultiplayer; });
+  if(inst&&!NET.on){ openSetup('host'); hostRoom(); }
+}
+function cgInvite(code){
+  if(!ADS.cg||!code) return;
+  cgCall(function(sdk){ if(sdk.game.showInviteButton){ sdk.game.showInviteButton({room:code}); CGX.inviteShown=true; } });
+}
+function cgHideInvite(){ if(!CGX.inviteShown) return; CGX.inviteShown=false; cgCall(function(sdk){ if(sdk.game.hideInviteButton) sdk.game.hideInviteButton(); }); }
+function cgInviteLink(code,cb){
+  var p=null; cgCall(function(sdk){ p=sdk.game.inviteLink({room:code}); });
+  Promise.resolve(p).then(function(u){ cb(u||null); },function(){ cb(null); });
+}
+function cgHappy(){ cgCall(function(sdk){ if(sdk.game.happytime) sdk.game.happytime(); }); }
+function rewardAvailable(){ return AD_CONFIG.provider==='crazygames'?!!ADS.cg:AD_CONFIG.provider==='house'; }
+function showRewarded(onReward){
+  if(ADS.busy) return;
+  var p=AD_CONFIG.provider;
+  if(p==='crazygames'&&ADS.cg){
+    ADS.busy=true; var done=false;
+    var fin=function(ok,msg){ if(done) return; done=true; ADS.busy=false; adAudio(false); if(ok) onReward(); else toast(msg||'いまは広告を見られません。少し待ってね'); };
+    try{ ADS.cg.ad.requestAd('rewarded',{adStarted:function(){ adAudio(true); },adFinished:function(){ fin(true); },adError:function(e){ fin(false,/soon/i.test(String(e))?'少し時間をおいてからもう一度どうぞ':null); }}); }catch(e){ fin(false); }
+    return;
+  }
+  if(p==='house'){ ADS.busy=true; var box=$('adbox'), sk=$('adSkip'), n=3; box.hidden=false; sk.disabled=true; sk.textContent=n+'秒後にごほうび';
+    var iv=setInterval(function(){ n--; if(n>0){ sk.textContent=n+'秒後にごほうび'; return; } clearInterval(iv); sk.disabled=false; sk.textContent='ごほうびをもらう ✕'; },1000);
+    sk.onclick=function(){ if(sk.disabled) return; sk.onclick=null; box.hidden=true; ADS.busy=false; onReward(); }; return; }
+  toast('この場所では広告はありません');
+}
+
+/* ---------- Cosmetics: footprint trails (look only, never stronger) ---------- */
+var COS=[
+  {id:'',n:'なし'},
+  {id:'star',n:'キラキラ星',c:[0xffe27a,0xffffff],need:{plays:1},how:'1回遊ぶ'},
+  {id:'heart',n:'ハート',c:[0xff7ab8,0xff4a7a],need:{plays:3},how:'3回遊ぶ'},
+  {id:'bubble',n:'あわ',c:[0x9ae0ff,0xffffff],need:{wins:1},how:'1回優勝'},
+  {id:'leaf',n:'はっぱ',c:[0x7ad86a,0xc8e86a],need:{kos:20},how:'通算20KO'},
+  {id:'fire',n:'ほのお',c:[0xff8a3a,0xffd23a],need:{wins:3},how:'3回優勝'},
+  {id:'rainbow',n:'にじ',c:'rainbow',need:{plays:10},how:'10回遊ぶ'},
+  {id:'gold',n:'金ピカ',c:[0xffd23a,0xffc000],need:{wins:10},how:'10回優勝'}
+];
+var COSK='town-smash-cos-v1', memCos={own:[],sel:''};
+function loadCos(){ try{ var s=localStorage.getItem(COSK); if(s) return JSON.parse(s); }catch(e){} return memCos; }
+function saveCos(o){ memCos=o; try{ localStorage.setItem(COSK,JSON.stringify(o)); }catch(e){} }
+function cosDef(id){ for(var i=0;i<COS.length;i++) if(COS[i].id===id) return COS[i]; return null; }
+function cosOwned(id){
+  if(!id) return true; var c=cosDef(id); if(!c) return false;
+  if(loadCos().own.indexOf(id)>=0) return true;
+  var r=loadRec(), nd=c.need; return (nd.plays&&r.plays>=nd.plays)||(nd.wins&&r.wins>=nd.wins)||(nd.kos&&r.kos>=nd.kos)||false;
+}
+function mySel(){ var s=loadCos().sel||''; return cosOwned(s)?s:''; }
+function unlockRandom(){
+  var locked=COS.filter(function(c){ return c.id&&!cosOwned(c.id); });
+  if(!locked.length){ toast('もう全部持ってるよ!'); return; }
+  var c=pick(locked), o=loadCos(); o.own.push(c.id); o.sel=c.id; saveCos(o); sfx.win(); toast('★ 足あと「'+c.n+'」をゲット!'); toastT=3;
+  renderSetup(); if(NET.host) lobbyBroadcast(); else sendMe();
+}
+function trailColor(f){ var c=cosDef(f.trail); if(!c||!c.c) return null; if(c.c==='rainbow'){ var h=(tAnim*.6+f.slot*.1)%1; return new THREE.Color().setHSL(h,1,.6).getHex(); } return pick(c.c); }
+function updateTrails(dt){
+  if(G.mode==='end'||G.mode==='title') return;
+  F.forEach(function(f){ if(!f.trail||!alive(f)||!f.moving) return; f.trT=(f.trT||0)-dt; if(f.trT>0) return; f.trT=.07;
+    var col=trailColor(f); if(col!==null) puff(f.x+rnd(-.2,.2),.25,f.z+rnd(-.2,.2),col,1,.6,.5,f.trail==='bubble'?.6:.42); });
+}
+var _scf=spawnConfetti;
+spawnConfetti=function(w){
+  _scf(w); var c=cosDef(w.trail); if(!c||!c.c) return;
+  CONF.forEach(function(k,i){ if(i%2===0) k.m.material.color.setHex(c.c==='rainbow'?new THREE.Color().setHSL(Math.random(),1,.6).getHex():pick(c.c)); });
+};
+function renderCos(){
+  var el=$('optTrail'); if(!el) return;
+  var sel=mySel();
+  el.innerHTML=COS.map(function(c){ var own=cosOwned(c.id); return '<button data-v="'+c.id+'" class="'+(c.id===sel?'sel':'')+(own?'':' locked')+'">'+(own?'':'🔒')+c.n+(own||!c.how?'':'<small>'+c.how+'で解放</small>')+'</button>'; }).join('');
+  el.onclick=function(e){ var b=e.target.closest('button'); if(!b) return; var id=b.dataset.v;
+    if(!cosOwned(id)){ toast(cosDef(id).how+'で解放'+(rewardAvailable()?'（広告を見てもOK）':'')); return; }
+    var o=loadCos(); o.sel=id; saveCos(o); sfx.tick2(); renderCos(); if(NET.host) lobbyBroadcast(); else sendMe(); };
+  var rb=$('rwBtn'), anyLocked=COS.some(function(c){ return c.id&&!cosOwned(c.id); });
+  rb.hidden=!(rewardAvailable()&&anyLocked);
+}
+
 /* ---------- Settings / records ---------- */
 var SETK='town-smash-set-v1', RECK='town-smash-rec-v1';
 var SET={v15:1,stage:'super',n:15,lvl:1,stock:3,ch:'baba',name:'',snd:0,talk:1};
@@ -2692,6 +2785,7 @@ function grabPress(p){
 }
 window.addEventListener('keydown',function(e){
   if(e.target&&e.target.tagName==='INPUT'){ if(e.code==='Enter'&&e.target.id==='codeIn') $('joinGo').click(); return; }
+  if(/^Arrow|^Space$/.test(e.code)) e.preventDefault();
   keys[e.code]=true;
   if(e.code==='KeyP'||e.code==='Escape'){ togglePause(); return; }
   if(G.mode==='demo'&&(e.code==='Enter'||e.code==='Space')&&!$('title').hidden&&document.activeElement===document.body){ e.preventDefault(); openSetup('local'); return; }
@@ -2780,7 +2874,7 @@ function hostRoom(){
     (function open(){
       var code=String(10000+Math.floor(Math.random()*90000)), p=new Peer(PFX+code,peerOpts());
       NET.peer=p;
-      p.on('open',function(){ NET.on=true; NET.host=true; NET.code=code; NET.pid='host'; NET.players=[{pid:'host',name:myName(),ch:SET.ch}];
+      p.on('open',function(){ NET.on=true; NET.host=true; NET.code=code; NET.pid='host'; NET.players=[{pid:'host',name:myName(),ch:SET.ch,tr:mySel()}]; cgInvite(code);
         $('roomCode').textContent=code; roomMsg('この合言葉を友だちに伝えてね（最大15人）'); lobbyBroadcast(); });
       p.on('connection',hostConn);
       p.on('error',function(e){ if(e.type==='unavailable-id'&&tries++<6){ try{ p.destroy(); }catch(x){} open(); } else if(e.type!=='peer-unavailable') roomMsg('通信エラー: '+e.type); });
@@ -2806,7 +2900,7 @@ function hostRecv(c,d){
     var i=playerIdx(c.peer), pl;
     if(i<0){ if(NET.players.length>=15||NET.inMatch) return; pl={pid:c.peer}; NET.players.push(pl); sfx.coin(); }
     else pl=NET.players[i];
-    pl.name=cleanName(d.name)||('ゲスト'+NET.players.length); pl.ch=CH[d.ch]?d.ch:'baba';
+    pl.name=cleanName(d.name)||('ゲスト'+NET.players.length); pl.ch=CH[d.ch]?d.ch:'baba'; pl.tr=cosDef(d.tr)?d.tr:'';
     if(i<0) toast(pl.name+' が入った');
     lobbyBroadcast();
   } else if(d.t==='i'){
@@ -2825,7 +2919,7 @@ function hostDrop(pid){
 }
 function lobbyBroadcast(){
   if(!NET.host) return;
-  if(NET.players[0]){ NET.players[0].name=myName(); NET.players[0].ch=SET.ch; }
+  if(NET.players[0]){ NET.players[0].name=myName(); NET.players[0].ch=SET.ch; NET.players[0].tr=mySel(); }
   bcast({t:'lobby',players:NET.players,set:{stage:SET.stage,n:SET.n,lvl:SET.lvl,stock:SET.stock},code:NET.code});
   renderLobby();
 }
@@ -2839,7 +2933,7 @@ function joinRoom(code){
       NET.pid=id;
       var c=p.connect(PFX+code,{reliable:true,serialization:'json'}); NET.conn=c;
       c.on('open',function(){ clearTimeout(to); NET.on=true; NET.host=false; NET.code=code; $('joinGo').disabled=false;
-        c.send({t:'hello',name:myName(),ch:SET.ch}); $('roomCode').textContent=code; setupMode('client'); roomMsg('つながった! ホストの開始を待っています'); });
+        c.send({t:'hello',name:myName(),ch:SET.ch,tr:mySel()}); $('roomCode').textContent=code; setupMode('client'); roomMsg('つながった! ホストの開始を待っています'); });
       c.on('data',clientRecv);
       c.on('close',function(){ if(NET.on&&NET.conn===c) netLost('ホストとの接続が切れました'); });
     });
@@ -2848,14 +2942,14 @@ function joinRoom(code){
       joinMsg(e.type==='peer-unavailable'?'その合言葉の部屋が見つかりません':'通信エラー: '+e.type); });
   });
 }
-function sendMe(){ if(NET.on&&!NET.host&&NET.conn&&NET.conn.open) NET.conn.send({t:'me',name:myName(),ch:SET.ch}); }
+function sendMe(){ if(NET.on&&!NET.host&&NET.conn&&NET.conn.open) NET.conn.send({t:'me',name:myName(),ch:SET.ch,tr:mySel()}); }
 function netLost(msg){
   netReset(); G.client=false;
   ['setup','end','pause','adbox'].forEach(function(id){ $(id).hidden=true; });
   toTitle(); toast(msg); toastT=4;
 }
 function leaveNet(){
-  var p=NET.peer;
+  var p=NET.peer; cgHideInvite();
   if(NET.on){ if(NET.host) bcast({t:'close'}); else { try{ NET.conn.close(); }catch(e){} } }
   NET.peer=null; netReset(); G.client=false;
   if(p) setTimeout(function(){ try{ p.destroy(); }catch(e){} },400);
@@ -2963,12 +3057,12 @@ function fillCPU(r,n,lvl){
   return r;
 }
 function localRoster(){
-  var n=SET.n, r=[{type:SET.ch,name:myName(),human:true,local:true,pad:0}];
+  var n=SET.n, r=[{trail:mySel(),type:SET.ch,name:myName(),human:true,local:true,pad:0}];
   var ps=pads(); for(var i=1;i<ps.length&&r.length<Math.min(4,n);i++) if(ps[i]) r.push({type:pick(CH_KEYS),name:(r.length+1)+'P',human:true,local:true,pad:i});
   return fillCPU(r,n,SET.lvl);
 }
 function hostRoster(){
-  var r=NET.players.map(function(p){ return {type:p.ch,name:p.name,human:true,pid:p.pid,local:p.pid==='host',pad:p.pid==='host'?0:-1}; });
+  var r=NET.players.map(function(p){ return {trail:p.tr,type:p.ch,name:p.name,human:true,pid:p.pid,local:p.pid==='host',pad:p.pid==='host'?0:-1}; });
   return fillCPU(r,Math.max(SET.n,r.length),SET.lvl);
 }
 function stageKey(){ return SET.stage==='random'?pick(STAGE_KEYS):SET.stage; }
@@ -3003,14 +3097,14 @@ function beginFight(){
   if(NET.on&&NET.host){
     var key=stageKey();
     startMatchWith(key,hostRoster(),{stock:SET.stock});
-    NET.inMatch=true; NET.EV=[]; NET.sendT=0;
-    bcast({t:'start',stage:key,stock:G.stock,limit:G.limit,fs:F.map(function(f){ return {type:f.type,name:f.name,human:f.human,pid:f.pid}; })});
+    NET.inMatch=true; NET.EV=[]; NET.sendT=0; cgHideInvite();
+    bcast({t:'start',stage:key,stock:G.stock,limit:G.limit,fs:F.map(function(f){ return {type:f.type,name:f.name,human:f.human,pid:f.pid,trail:f.trail}; })});
   } else startMatchWith(stageKey(),localRoster(),{stock:SET.stock});
 }
 function clientStart(d){
   initAudio();
   ['title','setup','end','pause'].forEach(function(id){ $(id).hidden=true; });
-  var r=d.fs.map(function(x){ var me=x.pid&&x.pid===NET.pid; return {type:CH[x.type]?x.type:'baba',name:x.name,human:x.human,pid:x.pid,local:me,pad:me?0:-1,lvl:1}; });
+  var r=d.fs.map(function(x){ var me=x.pid&&x.pid===NET.pid; return {trail:x.trail,type:CH[x.type]?x.type:'baba',name:x.name,human:x.human,pid:x.pid,local:me,pad:me?0:-1,lvl:1}; });
   NET.inMatch=true; NET.pend={a:0,g:0,d:0};
   startMatchWith(d.stage,r,{client:true,stock:d.stock,limit:d.limit});
   NET.mySlot=-1; F.forEach(function(f){ if(f.local) NET.mySlot=f.slot; });
@@ -3033,7 +3127,9 @@ function showResults(timeout){
   $('endStage').textContent=STAGE.n+' ・ '+fmt(G.time)+(timeout?' ・ 時間切れ':'')+(NET.on?' ・ オンライン':'');
   $('endTitle').textContent=me&&win===me?'優勝!':(win.name+' の勝ち');
   $('resList').innerHTML=list.map(function(f){ return '<div class="'+(f===me?'me':'')+'" style="--c:'+f.hex+'"><b>'+f.place+'位</b><div>'+esc(f.name)+' <small>'+(f.human?'':'CPU ・ ')+f.cn+'</small></div><span>KO '+f.kos+' ・ '+Math.round(f.dmg)+'ダメ</span></div>'; }).join('');
-  if(me){ var r=loadRec(); r.plays++; r.kos+=me.kos; if(win===me){ r.wins++; r.streak=(r.streak||0)+1; r.best=Math.max(r.best||0,r.streak); } else r.streak=0; saveRec(r); }
+  var ownBefore=COS.filter(function(c){ return c.id&&cosOwned(c.id); }).length;
+  if(me){ var r=loadRec(); r.plays++; r.kos+=me.kos; if(win===me){ r.wins++; r.streak=(r.streak||0)+1; r.best=Math.max(r.best||0,r.streak); } else r.streak=0; saveRec(r); if(win===me) cgHappy();
+    var nw=COS.filter(function(c){ return c.id&&cosOwned(c.id); }); if(nw.length>ownBefore) setTimeout(function(){ toast('★ 新しい足あとエフェクトが解放された! 準備画面で選べるよ'); toastT=4; },3600); }
   $('rankE').textContent=recText()+(timeout?' ・ 時間切れは残機と体力で判定':'');
   var cl=NET.on&&!NET.host;
   $('again').hidden=cl; $('toSetup').hidden=cl; $('endWait').hidden=!cl;
@@ -3074,6 +3170,7 @@ function renderSetup(){
   chips($('optStock'),[1,3,5].map(function(v){ return {v:v,t:v+'機'}; }),SET.stock,function(v){ SET.stock=+v; });
   chips($('optSnd'),[{v:0,t:'BGMと効果音'},{v:1,t:'効果音だけ'},{v:2,t:'なし'}],SET.snd,function(v){ setSnd(+v); initAudio(); });
   chips($('optTalk'),[{v:1,t:'少なめ',s:'自分のセリフだけ'},{v:2,t:'多め',s:'全員しゃべる'},{v:0,t:'なし',s:'KOのお知らせだけ'}],SET.talk,function(v){ SET.talk=+v; });
+  renderCos();
   chips($('optChar'),CH_KEYS.map(function(k){ return {v:k,t:CH[k].n}; }),SET.ch,function(v){ SET.ch=v; });
   var C=CH[SET.ch];
   $('charDesc').innerHTML='<b>'+C.n+'</b> 体力 '+C.hp+' ・ 速さ '+stars(C.spd)+(C.items?'':' ・ アイテム不可')+'<br>'+C.desc+'<br>★必殺「'+SP[SET.ch].n+'」'+SP[SET.ch].d;
@@ -3101,12 +3198,14 @@ $('hostBtn').addEventListener('click',function(){ openSetup('host'); hostRoom();
 $('joinBtn').addEventListener('click',function(){ openSetup('join'); joinMsg(''); setTimeout(function(){ $('codeIn').focus(); },50); });
 $('joinGo').addEventListener('click',function(){ var c=($('codeIn').value||'').replace(/\D/g,''); if(c.length!==5){ joinMsg('5けたの数字を入れてね'); return; } joinRoom(c); });
 $('fight').addEventListener('click',beginFight);
+$('rwBtn').addEventListener('click',function(){ initAudio(); showRewarded(unlockRandom); });
 $('setupBack').addEventListener('click',function(){ if(NET.on) leaveNet(); else netReset(); toTitle(); });
 $('nameIn').addEventListener('input',function(){ SET.name=cleanName(this.value); saveSet(); if(NET.host) lobbyBroadcast(); else sendMe(); });
 $('copyCode').addEventListener('click',function(){
-  var pm=location.search.match(/[?&]peer=[^&]+/), url=location.origin+location.pathname+'?room='+NET.code+(pm?'&'+pm[0].slice(1):'');
-  var txt='TOWN SMASHERS で乱闘しよう！ 合言葉 '+NET.code+' '+url;
-  try{ navigator.clipboard.writeText(txt).then(function(){ toast('招待をコピーした'); },function(){ toast('合言葉: '+NET.code); }); }catch(e){ toast('合言葉: '+NET.code); }
+  var copy=function(url){ var txt='TOWN SMASHERS で乱闘しよう！ 合言葉 '+NET.code+' '+url;
+    try{ navigator.clipboard.writeText(txt).then(function(){ toast('招待をコピーした'); },function(){ toast('合言葉: '+NET.code); }); }catch(e){ toast('合言葉: '+NET.code); } };
+  if(ADS.cg){ cgInviteLink(NET.code,function(u){ copy(u||''); }); return; }
+  var pm=location.search.match(/[?&]peer=[^&]+/); copy(location.origin+location.pathname+'?room='+NET.code+(pm?'&'+pm[0].slice(1):''));
 });
 $('btnPause').addEventListener('click',togglePause); $('resume').addEventListener('click',function(){ if(NET.on&&(NET.inMatch||G.client)) $('pause').hidden=true; else togglePause(); });
 $('quit').addEventListener('click',function(){ $('pause').hidden=true; if(NET.on) leaveNet(); G.client=false; toTitle(); });
@@ -3116,7 +3215,7 @@ $('btnSkip').addEventListener('click',function(){ if(G.mode==='play'&&!G.client)
 $('again').addEventListener('click',afterAd(beginFight));
 $('toSetup').addEventListener('click',afterAd(function(){
   $('end').hidden=true;
-  if(NET.on&&NET.host){ bcast({t:'lobbyBack'}); NET.inMatch=false; setupMode('host'); } else setupMode('local');
+  if(NET.on&&NET.host){ bcast({t:'lobbyBack'}); NET.inMatch=false; setupMode('host'); cgInvite(NET.code); } else setupMode('local');
   startDemo();
 }));
 $('endTitleBtn').addEventListener('click',afterAd(function(){ if(NET.on) leaveNet(); G.client=false; toTitle(); }));
@@ -3290,7 +3389,7 @@ function render(dt){
   if(SFXB) SFXB.gain.value=G.mode==='demo'?.32:1;
   var sh=$('sndHint'); if(sh) sh.hidden=!!(AC&&AC.state==='running')||SET.snd===2;
   F.forEach(function(f){ visualFighter(f,dt); });
-  updateCosmetic(dt); updateConfetti(dt); saberHumUpdate();
+  updateCosmetic(dt); updateConfetti(dt); saberHumUpdate(); updateTrails(dt);
   NEON.forEach(function(n){ n.l.intensity=n.b*(.75+.25*Math.sin(tAnim*n.f+n.p)); });
   cgGameplay(G.mode==='play'||G.mode==='count');
   var few=F.filter(inGame).length<=2||(G.limit-G.time<30);
