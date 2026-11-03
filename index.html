@@ -2042,7 +2042,7 @@ var SP={
   jiji:{n:'ゴールドハリセン',t:5,w:'harisen',d:'5秒間、当てれば一撃KO'},
   baba:{n:'巨大漬物石',t:2.4,d:'巨大な漬物石を落とす範囲攻撃(大)'},
   salary:{n:'名刺投げ放題',t:8,w:'meishi',d:'8秒間、名刺を扇状に投げ放題'},
-  career:{n:'ミラーボール',t:4,d:'4秒間、ステージ全員に光の攻撃(中)'},
+  career:{n:'ミラーボール',t:4,d:'4秒間、ステージ全員に光の攻撃(大)。自分は足が速くなる'},
   zombie:{n:'異形の怪物',t:15,d:'5秒間怪物に変身、そのあと10秒間パワーとスピードアップ'},
   dog:{n:'犬神',t:10,d:'10秒間、まわりに攻撃サークル'},
   monkey:{n:'大猿',t:5,w:'oobeam',d:'5秒間巨大化して、口から直線ビーム(大)'},
@@ -2079,7 +2079,7 @@ makeItemModel=function(id){
 };
 var _mpm=makeProjMesh;
 makeProjMesh=function(mk){ if(mk==='card'){ var c=bx(.22,.012,.13,0xffffff); var l=bx(.22,.014,.02,0x3a6ad0); l.position.z=.04; c.add(l); return c; } return _mpm(mk); };
-function spSpd(f){ if(!(f.spT>0)) return 1; if(f.type==='zombie') return f.spT>10?2.6:1.8; if(f.type==='dog') return 1.25; return 1; }
+function spSpd(f){ if(!(f.spT>0)) return 1; if(f.type==='zombie') return f.spT>10?2.6:1.8; if(f.type==='dog') return 1.25; if(f.type==='career') return 1.3; return 1; }
 function spDmg(f){ if(!(f.spT>0)) return 1; if(f.type==='zombie') return f.spT>10?2.5:1.6; return 1; }
 function superArmor(t){ return t.spT>0&&((t.type==='zombie'&&t.spT>10)||t.type==='monkey'); }
 function activateSpecial(f){
@@ -2124,7 +2124,7 @@ function specialCloud(c,dt){
     if(alive(c.owner)){ c.x=c.owner.x; c.z=c.owner.z; c.mesh.position.set(c.x,0,c.z); }
     c.tick-=dt;
     if(c.tick<=0&&c.age>.3){ c.tick=.5; sfx.mirror();
-      F.forEach(function(t){ if(t!==c.owner&&canHit(t)) hit(c.owner,t,4,2,ang(t.x-c.x,t.z-c.z),{how:'ミラーボール',col:pick([0xff4ad0,0x3ad8ff,0xffd23a,0x5aff7a]),quiet:1}); }); }
+      F.forEach(function(t){ if(t!==c.owner&&canHit(t)) hit(c.owner,t,7,3,ang(t.x-c.x,t.z-c.z),{how:'ミラーボール',col:pick([0xff4ad0,0x3ad8ff,0xffd23a,0x5aff7a]),quiet:1}); }); }
   }
 }
 function specialTick(f,dt){
